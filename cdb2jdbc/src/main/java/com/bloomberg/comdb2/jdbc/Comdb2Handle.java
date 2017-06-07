@@ -115,6 +115,9 @@ public class Comdb2Handle extends AbstractConnection {
     private String sslca, sslcapass, sslcatype;
     PEER_SSL_MODE peersslmode = PEER_SSL_MODE.PEER_SSL_ALLOW;
 
+    /* Connection Policy */
+    String connectionPolicy = ConnectionPolicy.CDB2_LOOKUP_HOST_PORT;
+
     static class QueryItem {
         byte[] buffer;
         boolean isRead;
@@ -130,7 +133,7 @@ public class Comdb2Handle extends AbstractConnection {
 
     public Comdb2Handle duplicate() {
         /* new an object. */
-        Comdb2Handle ret = new Comdb2Handle(myDbName, myDbCluster);
+        Comdb2Handle ret = new Comdb2Handle(myDbName, myDbCluster, connectionPolicy);
         /* copy attributes over. */
         ret.myPolicy = myPolicy;
         ret.comdb2dbHosts.addAll(comdb2dbHosts);
@@ -147,10 +150,12 @@ public class Comdb2Handle extends AbstractConnection {
         ret.dnssuffix = dnssuffix;
         ret.hasUserTcpSz = hasUserTcpSz;
         ret.tcpbufsz = tcpbufsz;
+        ret.connectionPolicy = connectionPolicy;
+
         return ret;
     }
 
-    public Comdb2Handle(String dbname, String cluster) {
+    public Comdb2Handle(String dbname, String cluster, String connectionPolicy ) {
         super(new ProtobufProtocol(), null);
         sets = new ArrayList<String>();
         String stringUuid = UUID.randomUUID().toString();
@@ -160,11 +165,20 @@ public class Comdb2Handle extends AbstractConnection {
         queryList = new ArrayList<QueryItem>();
         myDbName = dbname;
         myDbCluster = cluster;
-        try {
-            this.lookup();
+        this.connectionPolicy = connectionPolicy;
+
+        //Only do a default lookup if the user has not specified a speficif host and port
+        //At this point we know that user wants us to connect to a db running on specific
+        //server and at a specific port
+
+        if ( !ConnectionPolicy.CDB2_USER_SPECIFIED_HOST_PORT .equals(connectionPolicy)) {
+            try {
+                this.lookup();
+            }
+            catch(NoDbHostFoundException e) {}
         }
-        catch(NoDbHostFoundException e) {}
     }
+
 
     public void lookup() throws NoDbHostFoundException {
         BBSysUtils.getDbHosts(this);

@@ -121,6 +121,11 @@ berkdb/qam/qam_auto.c
 # generated tools
 sqlite/mkkeywordhash
 sqlite/lemon
+tools/ls/cdb2_dump/cdb2_dump
+tools/cdb2_printlog/cdb2_printlog
+tools/cdb2_stat/cdb2_stat
+tools/cdb2_verify/cdb2_verify
+tools/cdb2_dump/cdb2_dump
 
 # binaries
 comdb2
@@ -128,6 +133,12 @@ pmux
 cdb2sql
 cdb2sockpool
 comdb2ar
+cdb2_dump
+cdb2_printlog
+cdb2_stat
+cdb2_verify
+comdb2sca
+comdb2sc
 
 # built tool libraries
 libcomdb2ar.a
@@ -243,6 +254,9 @@ debian
 !cdb2jdbc/**
 cdb2jdbc/target/**
 cdb2jdbc/maven.m2/**
+cdb2jdbc/cdb2jdbc.iml
+cdb2jdbc/.idea
+.DS_Store
 
 # generated docs
 _site/

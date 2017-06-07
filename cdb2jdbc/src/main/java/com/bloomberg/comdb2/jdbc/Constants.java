@@ -21,6 +21,11 @@ package com.bloomberg.comdb2.jdbc;
  */
 public class Constants {
 
+    public class ConnectionPolicy {
+        public static final String CDB2_LOOKUP_HOST_PORT = "CBD2_LOOKUP_HOST_TYPE";
+        public static final String CDB2_USER_SPECIFIED_HOST = "CDB2_USER_SPECIFIED_HOST";
+        public static final String CDB2_USER_SPECIFIED_HOST_PORT = "CDB2_USER_SPECIFIED_HOST_PORT";
+    }
     public class RequestType {
         public static final int CDB2_REQUEST_CDB2QUERY = 1;
         public static final int CDB2_REQUEST_SQLQUERY = 2;

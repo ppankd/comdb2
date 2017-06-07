@@ -19,9 +19,9 @@ import java.util.logging.*;
 import java.net.*;
 
 import com.bloomberg.comdb2.jdbc.Cdb2DbInfoResponse.NodeInfo;
-import com.bloomberg.comdb2.jdbc.Cdb2Query;
 import com.bloomberg.comdb2.jdbc.Cdb2Query.Cdb2DbInfo;
 import com.bloomberg.comdb2.jdbc.Cdb2Query.Cdb2SqlQuery;
+
 
 /**
  * BBSysUtils provides functions that deal with Bloomberg environment stuff.
@@ -225,7 +225,7 @@ public class BBSysUtils {
      * @param validPorts
      *            where I want the ports of @dbName be stored.
      * @return
-     * @throws NoComdb2dbHostFoundException
+     * @throws NoDbHostFoundException
      */
     static int dbInfoQuery(Comdb2Handle hndl,
             Cdb2DbInfoResponse dbInfoResp,
@@ -298,8 +298,27 @@ public class BBSysUtils {
                     continue;
                 }
 
-                validHosts.add(node.name);
-                validPorts.add(node.port);
+                //User has specified the host and port. We tried the connection in earlier step
+                //and it was successful. We can use the same host and ignore the hostname returned
+                //by the dbinfoquery and use the same hostname send it by the user in cases of localhost.
+                // We are controlling this only for localhost because of the following reasons
+                // 1 - Most likely the user is forwarding some port to localhost. This is usually done only
+                //     in case of integration testing. Chances of user running connection client on the same host
+                //     as db server is minimal in production.
+                // 2 - This works in cases where database is running in a docker container. The dbinfo query
+                //     returns back the hostname of the docker container which is in-accessible from host
+
+                if (Constants.ConnectionPolicy.CDB2_USER_SPECIFIED_HOST_PORT.equals(hndl.connectionPolicy) &&
+                        "localhost".equalsIgnoreCase(host)) {
+                    validHosts.add(host);
+                    validPorts.add(port);
+                    //do nothing
+
+                } else {
+                    validHosts.add(node.name);
+                    validPorts.add(node.port);
+
+                }
 
                 if (debug) {
                     System.out.println("Added " + node.name + ":" + 
@@ -482,6 +501,11 @@ public class BBSysUtils {
         hndl.myDbHosts.clear();
         hndl.myDbPorts.clear();
 
+        if(Constants.ConnectionPolicy.CDB2_USER_SPECIFIED_HOST_PORT.equalsIgnoreCase(hndl.connectionPolicy)) {
+            hndl.isDirectCpu = true;
+            hndl.myDbHosts.add(hndl.myDbCluster);
+            hndl.myDbPorts.add(hndl.overriddenPort);
+        }
         if (hndl.myDbCluster.equalsIgnoreCase("local")) {
 			/* type is local */
             hndl.isDirectCpu = true;

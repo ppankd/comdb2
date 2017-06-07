@@ -56,7 +56,7 @@ public class Comdb2Connection implements Connection {
 
     private String user;
     private String password;
-
+    private String connectionPolicy = null;
     private boolean usemicrodt = true;
 
     /**
@@ -85,22 +85,26 @@ public class Comdb2Connection implements Connection {
         /* empty constructor for duplicate(). */
     }
 
+    public Comdb2Connection(String db, String cluster, String connectionPolicy ) {
+        this (db, cluster, -1,  connectionPolicy );
+    }
     public Comdb2Connection(String db, String cluster) {
-        this(db, cluster, -1);
+        this(db, cluster, -1, Constants.ConnectionPolicy.CDB2_LOOKUP_HOST_PORT);
     }
 
     public Comdb2Handle dbHandle() {
         return this.hndl;
     }
 
-    public Comdb2Connection(String db, String cluster, int timeout) {
+    public Comdb2Connection(String db, String cluster, int timeout, String connectionPolicy) {
         /**
          * The handle is opened in the constructor.
          */
         this.db = db;
         this.cluster = cluster;
         this.timeout = timeout;
-        hndl = new Comdb2Handle(db, cluster);
+        this.connectionPolicy = connectionPolicy;
+        hndl = new Comdb2Handle(db, cluster, connectionPolicy);
     }
 
     public void lookup() throws SQLException {

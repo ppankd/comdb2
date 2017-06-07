@@ -101,6 +101,7 @@ public class Driver implements java.sql.Driver {
         String policy = null;
         ArrayList<String> hosts = new ArrayList<String>();
         ArrayList<Integer> ports = new ArrayList<Integer>();
+        String connectionPolicy = Constants.ConnectionPolicy.CDB2_LOOKUP_HOST_PORT;
 
         if (tokens.length < 4) { /* Use legacy format */
             tokens = url.split(":\\s*|\\s+");
@@ -137,6 +138,8 @@ public class Driver implements java.sql.Driver {
                 /* read url string */
                 if (hosttokens.length > 1)
                     port = hosttokens[1];
+
+                connectionPolicy = Constants.ConnectionPolicy.CDB2_USER_SPECIFIED_HOST_PORT;
             }
 
             /* dbtokens db[?key=value...] */
@@ -202,7 +205,7 @@ public class Driver implements java.sql.Driver {
             }
         }
 
-        ret = new Comdb2Connection(dbStr, clusterStr);
+        ret = new Comdb2Connection(dbStr, clusterStr, connectionPolicy);
         /* add user supplied hosts, if any */
         ret.addHosts(hosts);
         ret.addPorts(ports);
